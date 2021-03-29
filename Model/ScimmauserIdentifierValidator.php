@@ -17,9 +17,8 @@ class ScimmauserIdentifierValidator extends AppModel {
   }
   
   /**
-   * Validate an identifier (which could also be an email address).
+   * Validate the identifier against the configured block list.
    *
-   * @since  COmanage Registry v2.0.0
    * @param  String  $identifier            The identifier (or email address) to be validated
    * @param  Array   $coIdentifierValidator CO Identifier Validator configuration
    * @param  Array   $coExtendedType        CO Extended Type configuration describing $identifier
@@ -31,9 +30,12 @@ class ScimmauserIdentifierValidator extends AppModel {
   
   public function validate($identifier, $coIdentifierValidator, $coExtendedType, $pluginCfg) {
 
-    $this->log("Checking $identifier against The-Big-Username-Blocklist");
+    $blockFilePath = Configure::read('ScimmauserIdentifierValidator.blockFilePath');
 
-    $blockFile = fopen("/srv/comanage-registry/local/list_raw.txt", "r");
+    $blockFile = fopen($blockFilePath, "r");
+    if(!$blockFile) {
+      throw new InvalidArgumentException("Error validating username. Please report this error to the administrators.");
+    }
 
     $bad = false;
 
